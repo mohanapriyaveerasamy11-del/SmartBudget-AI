@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartBudget AI – Financial Planning Agent</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">SmartBudget AI</h1>
+          <p class="brand-subtitle">Your Personal Financial Planning Assistant</p>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <span class="badge lab-badge">Prompt Engineering Lab</span>
+        <button id="btn-open-prompt-inspector" class="btn btn-outline btn-sm" title="Inspect system prompt and AI payload">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          Prompt Inspector
+        </button>
+        <div id="engine-status-pill" class="status-pill status-demo">
+          <span class="status-dot"></span>
+          <span id="engine-status-text">Checking AI Engine...</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Educational Disclaimer Banner -->
+  <aside class="notice-banner">
+    <div class="banner-content">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="16" x2="12" y2="12"></line>
+        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+      </svg>
+      <span><strong>Educational Demonstration Only:</strong> This application uses hypothetical financial data for academic study and prompt engineering experiments. It does not provide certified financial advice.</span>
+    </div>
+  </aside>
+
+  <!-- Main Container -->
+  <main class="main-layout">
+    <!-- Left Column: Financial Setup & Expense Management -->
+    <section class="planner-inputs-column">
+      
+      <!-- Income & Savings Target Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon bg-green-subtle">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+              <line x1="12" y1="8" x2="12" y2="16"></line>
+              <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+          </div>
+          <div>
+            <h2 class="card-title">1. Income & Savings Targets</h2>
+            <p class="card-desc">Enter your monthly earnings and desired savings goal.</p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="monthly-income" class="form-label">
+              Monthly Income <span class="required">*</span>
+            </label>
+            <div class="input-with-affix">
+              <span class="affix">₹</span>
+              <input 
+                type="number" 
+                id="monthly-income" 
+                class="form-control" 
+                placeholder="e.g. 30000" 
+                min="0" 
+                step="100"
+              >
+            </div>
+            <span class="field-hint">Hypothetical monthly take-home income.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="savings-goal" class="form-label">
+              Monthly Savings Goal <span class="required">*</span>
+            </label>
+            <div class="input-with-affix">
+              <span class="affix">₹</span>
+              <input 
+                type="number" 
+                id="savings-goal" 
+                class="form-control" 
+                placeholder="e.g. 7000" 
+                min="0" 
+                step="100"
+              >
+            </div>
+            <span class="field-hint">Target amount to reserve for savings.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Expense Entry Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon bg-emerald-subtle">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="1" x2="12" y2="23"></line>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+          </div>
+          <div>
+            <h2 class="card-title">2. Add Expenses</h2>
+            <p class="card-desc">Categorize your spending with transparent essential / non-essential classification.</p>
+          </div>
+        </div>
+
+        <!-- Add Expense Form -->
+        <form id="expense-entry-form" class="expense-entry-form" onsubmit="return false;">
+          <div class="expense-inputs-grid">
+            <div class="form-group">
+              <label for="expense-category" class="form-label">Category <span class="required">*</span></label>
+              <select id="expense-category" class="form-control" required>
+                <option value="" disabled selected>Select category</option>
+                <option value="Housing and Rent">Housing and Rent</option>
+                <option value="Food and Groceries">Food and Groceries</option>
+                <option value="Transportation">Transportation</option>
+                <option value="Education">Education</option>
+                <option value="Utilities">Utilities</option>
+                <option value="Healthcare">Healthcare</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="Shopping">Shopping</option>
+                <option value="Other Expenses">Other Expenses</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="expense-desc" class="form-label">Description</label>
+              <input 
+                type="text" 
+                id="expense-desc" 
+                class="form-control" 
+                placeholder="e.g. Apartment rent, Groceries"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="expense-amount" class="form-label">Amount (₹) <span class="required">*</span></label>
+              <div class="input-with-affix">
+                <span class="affix">₹</span>
+                <input 
+                  type="number" 
+                  id="expense-amount" 
+                  class="form-control" 
+                  placeholder="e.g. 8000" 
+                  min="0" 
+                  step="50"
+                >
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="expense-classification" class="form-label">
+                Classification 
+                <span class="tooltip-trigger" title="Transparent rule: Housing, Food, Transportation, Education, Utilities, and Healthcare are preset as Essential; Entertainment, Shopping, and Other Expenses are Non-Essential. You can customize anytime.">ⓘ</span>
+              </label>
+              <select id="expense-classification" class="form-control">
+                <option value="Essential">Essential (Need)</option>
+                <option value="Non-Essential">Non-Essential (Want)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-actions-inline">
+            <button type="button" id="btn-add-expense" class="btn btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Add Expense
+            </button>
+            <span id="classification-hint" class="hint-pill">Default rule: Select a category to auto-suggest classification</span>
+          </div>
+        </form>
+
+        <!-- Expenses Table / List -->
+        <div class="expenses-table-wrapper">
+          <div class="expenses-table-header">
+            <h3>Itemized Expenses (<span id="expense-count">0</span> items)</h3>
+            <div class="expenses-quick-metrics">
+              <span class="metric-tag tag-essential">Essential: <strong id="quick-essential-total">₹0</strong></span>
+              <span class="metric-tag tag-non-essential">Non-Essential: <strong id="quick-non-essential-total">₹0</strong></span>
+            </div>
+          </div>
+
+          <table class="expenses-table" id="expenses-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Type</th>
+                <th class="text-right">Amount (₹)</th>
+                <th class="text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody id="expenses-table-body">
+              <tr class="empty-row" id="empty-expenses-row">
+                <td colspan="5">
+                  <div class="empty-state">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                      <line x1="16" y1="2" x2="16" y2="6"></line>
+                      <line x1="8" y1="2" x2="8" y2="6"></line>
+                      <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <p>No expenses added yet. Click <strong>Load Sample Data</strong> or enter items above.</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td colspan="3"><strong>Total Monthly Expenses:</strong></td>
+                <td class="text-right"><strong id="quick-total-expenses">₹0</strong></td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <!-- Global Control Buttons -->
+        <div class="budget-control-bar">
+          <button id="btn-load-sample" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Load Sample Data
+          </button>
+          
+          <button id="btn-reset" class="btn btn-outline-danger">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="1 4 1 10 7 10"></polyline>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+            </svg>
+            Reset Form
+          </button>
+
+          <button id="btn-generate-budget" class="btn btn-success btn-lg">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            Generate My Budget
+          </button>
+        </div>
+
+        <!-- Validation Alert Banner -->
+        <div id="validation-alert" class="alert alert-danger" style="display: none;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <div id="validation-message">Please fix the highlighted errors.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Column: Results Dashboard -->
+    <section class="planner-results-column" id="results-section">
+      
+      <!-- Welcome Placeholder (shown before generating budget) -->
+      <div id="results-placeholder" class="card placeholder-card">
+        <div class="placeholder-graphic">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+            <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+          </svg>
+        </div>
+        <h3>Ready to Plan Your Budget</h3>
+        <p>Enter your monthly income, savings goal, and expenses on the left, or click <strong>Load Sample Data</strong> to explore a real scenario. Then click <strong>Generate My Budget</strong> to evaluate feasibility and receive intelligent recommendations.</p>
+        <button id="btn-placeholder-sample" class="btn btn-secondary">
+          Try Sample Scenario (₹30,000 Income)
+        </button>
+      </div>
+
+      <!-- Main Results Content (revealed on generation) -->
+      <div id="results-content" style="display: none;">
+        
+        <!-- Goal Feasibility Status Banner -->
+        <div id="goal-status-banner" class="status-banner status-achievable">
+          <div class="banner-icon-container">
+            <span id="goal-status-icon">✓</span>
+          </div>
+          <div class="banner-body">
+            <div class="status-title-row">
+              <span class="status-label-badge" id="goal-status-badge">Achievable</span>
+              <h3 id="goal-status-heading">Savings Goal is Achievable!</h3>
+            </div>
+            <p id="goal-status-desc">Your monthly cash flow supports your target savings with a comfortable safety margin.</p>
+          </div>
+        </div>
+
+        <!-- 6 KPI Metric Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <span class="kpi-label">Monthly Income</span>
+            <div class="kpi-value text-primary" id="kpi-income">₹0</div>
+            <span class="kpi-subtext">Base earnings</span>
+          </div>
+
+          <div class="kpi-card">
+            <span class="kpi-label">Total Expenses</span>
+            <div class="kpi-value text-danger" id="kpi-expenses">₹0</div>
+            <span class="kpi-subtext" id="kpi-expenses-breakdown">Essential + Non-Essential</span>
+          </div>
+
+          <div class="kpi-card">
+            <span class="kpi-label">Available Balance</span>
+            <div class="kpi-value text-accent" id="kpi-available">₹0</div>
+            <span class="kpi-subtext">Income − Expenses</span>
+          </div>
+
+          <div class="kpi-card">
+            <span class="kpi-label">Savings Goal</span>
+            <div class="kpi-value text-blue" id="kpi-goal">₹0</div>
+            <span class="kpi-subtext">Required monthly target</span>
+          </div>
+
+          <div class="kpi-card">
+            <span class="kpi-label">Balance After Savings</span>
+            <div class="kpi-value" id="kpi-balance-after">₹0</div>
+            <span class="kpi-subtext">Available − Goal</span>
+          </div>
+
+          <div class="kpi-card">
+            <span class="kpi-label">Savings Rate</span>
+            <div class="kpi-value text-teal" id="kpi-savings-rate">0.0%</div>
+            <span class="kpi-subtext">% of monthly income</span>
+          </div>
+        </div>
+
+        <!-- Visual Analytics Row: Savings Progress & Expense Split -->
+        <div class="analytics-row">
+          <!-- Savings Progress Indicator -->
+          <div class="card card-analytics">
+            <div class="card-analytics-header">
+              <h4>Savings Goal Progress</h4>
+              <span id="savings-progress-percent" class="badge">0%</span>
+            </div>
+            <p class="analytics-caption">Allocation of available cash flow towards your goal:</p>
+            <div class="progress-bar-container">
+              <div id="savings-progress-fill" class="progress-bar-fill fill-green" style="width: 0%;"></div>
+            </div>
+            <div class="progress-legend">
+              <span>Goal: <strong id="progress-goal-txt">₹0</strong></span>
+              <span>Available: <strong id="progress-avail-txt">₹0</strong></span>
+            </div>
+          </div>
+
+          <!-- Essential vs Non-Essential Breakdown -->
+          <div class="card card-analytics">
+            <div class="card-analytics-header">
+              <h4>Needs vs Wants Allocation</h4>
+              <span id="split-ratio-tag" class="badge">0% / 0%</span>
+            </div>
+            <p class="analytics-caption">Classification of your total spending:</p>
+            <div class="split-bar-container">
+              <div id="split-essential-fill" class="split-bar-segment segment-essential" style="width: 50%;" title="Essential"></div>
+              <div id="split-non-essential-fill" class="split-bar-segment segment-non-essential" style="width: 50%;" title="Non-Essential"></div>
+            </div>
+            <div class="split-legend">
+              <span class="legend-dot dot-essential">Essential: <strong id="split-essential-txt">₹0 (0%)</strong></span>
+              <span class="legend-dot dot-non-essential">Non-Essential: <strong id="split-non-essential-txt">₹0 (0%)</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 50/30/20 Budgeting Benchmark Analysis -->
+        <div class="card">
+          <div class="card-header-simple">
+            <div class="card-header-icon bg-green-subtle">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+              </svg>
+            </div>
+            <div>
+              <h3 class="card-title-sm">50/30/20 Rule Comparison</h3>
+              <p class="card-desc">Compare your budget with standard personal finance guidelines (50% Needs, 30% Wants, 20% Savings).</p>
+            </div>
+          </div>
+          <div class="benchmark-container" id="benchmark-bars">
+            <!-- Dynamically populated benchmark progress bars -->
+          </div>
+        </div>
+
+        <!-- Category Breakdown Breakdown List -->
+        <div class="card">
+          <div class="card-header-simple">
+            <div class="card-header-icon bg-emerald-subtle">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+            </div>
+            <div>
+              <h3 class="card-title-sm">Expense Category Breakdown</h3>
+              <p class="card-desc">Distribution of spending across defined categories.</p>
+            </div>
+          </div>
+          <div id="category-distribution-list" class="category-distribution-list">
+            <!-- Dynamically populated category distribution -->
+          </div>
+        </div>
+
+        <!-- JavaScript Source-of-Truth Mathematical Verification Card -->
+        <div class="card calculation-explanation-card">
+          <div class="card-header-simple">
+            <div class="card-header-icon bg-amber-subtle">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="4" y="2" width="16" height="20" rx="2"></rect>
+                <line x1="8" y1="6" x2="16" y2="6"></line>
+                <line x1="16" y1="14" x2="16" y2="18"></line>
+                <path d="M16 10h.01"></path>
+                <path d="M12 10h.01"></path>
+                <path d="M8 10h.01"></path>
+                <path d="M12 14h.01"></path>
+                <path d="M8 14h.01"></path>
+                <path d="M12 18h.01"></path>
+                <path d="M8 18h.01"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="card-title-sm">Calculation Audit & Explanation</h3>
+              <p class="card-desc">Deterministic figures calculated via JavaScript (Mathematical Ground Truth).</p>
+            </div>
+          </div>
+          <div class="calculation-steps-grid" id="calculation-steps">
+            <!-- Step-by-step breakdown dynamically injected -->
+          </div>
+        </div>
+
+        <!-- AI Agent / Demonstration Engine Output Card -->
+        <div class="card ai-recommendations-card">
+          <div class="ai-card-header">
+            <div class="ai-brand-badge">
+              <div class="ai-pulse-ring"></div>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2a4 4 0 0 1 4 4v1a4 4 0 0 1-4 4 4 4 0 0 1-4-4V6a4 4 0 0 1 4-4z"></path>
+                <path d="M19 14v1a7 7 0 0 1-14 0v-1"></path>
+                <line x1="12" y1="22" x2="12" y2="18"></line>
+              </svg>
+              <div>
+                <h3 class="card-title-sm">AI Budget Plan & Recommendations</h3>
+                <span id="ai-engine-active-badge" class="badge">Rule-Based Demonstration Engine</span>
+              </div>
+            </div>
+            <div class="ai-header-actions">
+              <button id="btn-copy-plan" class="btn btn-outline btn-sm" title="Copy recommendation plan">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                Copy Plan
+              </button>
+            </div>
+          </div>
+
+          <!-- Loading state skeleton -->
+          <div id="ai-loading-skeleton" class="ai-loading" style="display: none;">
+            <div class="loading-spinner"></div>
+            <p><strong>Analyzing your financial inputs with Gemini AI...</strong></p>
+            <span class="loading-subtext">Applying structured prompt instructions, category evaluations, and budgeting rules.</span>
+          </div>
+
+          <!-- AI Output Content Area -->
+          <div id="ai-output-body" class="ai-output-body">
+            <!-- Rendered markdown/HTML goes here -->
+          </div>
+        </div>
+
+        <!-- Report Download & Print Section -->
+        <div class="report-actions-footer">
+          <button id="btn-print-report" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            Print / Save Budget Report (PDF)
+          </button>
+          <button id="btn-export-json" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Export JSON Summary
+          </button>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- Prompt Engineering Inspector Modal (Lab Experiment Feature) -->
+  <div id="prompt-inspector-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+          <div>
+            <h3>Prompt Engineering Laboratory Inspector</h3>
+            <p>Inspect the system instructions, prompt structure, and data payloads passed to the AI.</p>
+          </div>
+        </div>
+        <button id="btn-close-inspector" class="btn-close" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-tabs">
+        <button class="modal-tab active" data-tab="tab-system-prompt">System Prompt</button>
+        <button class="modal-tab" data-tab="tab-user-prompt">User Prompt (Dynamic Payload)</button>
+        <button class="modal-tab" data-tab="tab-prompt-principles">Lab Principles & Techniques</button>
+      </div>
+
+      <div class="modal-body">
+        <div id="tab-system-prompt" class="tab-pane active">
+          <p class="tab-pane-desc">This system instruction governs persona, constraints, mathematical anchoring, and output structure:</p>
+          <pre><code id="inspector-system-prompt" class="code-block"></code></pre>
+        </div>
+
+        <div id="tab-user-prompt" class="tab-pane">
+          <p class="tab-pane-desc">This is the ground-truth payload dynamically assembled by JavaScript from current user inputs:</p>
+          <pre><code id="inspector-user-prompt" class="code-block"></code></pre>
+        </div>
+
+        <div id="tab-prompt-principles" class="tab-pane">
+          <div class="principles-list">
+            <div class="principle-item">
+              <h4>1. Ground-Truth Anchoring (Eliminating Math Hallucinations)</h4>
+              <p>LLMs frequently make arithmetic errors with multi-step budgeting. By computing totals in deterministic JavaScript and passing them as immutable facts, the prompt instructs the model to adhere strictly to the ground-truth figures.</p>
+            </div>
+            <div class="principle-item">
+              <h4>2. Role-Based Prompting & Boundary Setting</h4>
+              <p>The prompt explicitly instructs the agent to act as an educational budgeting coach, requiring structured headings, simple English, and explicit disclaimers without making risky financial promises.</p>
+            </div>
+            <div class="principle-item">
+              <h4>3. Feasibility Branching & Decision Tree Guidance</h4>
+              <p>The prompt enforces distinct analysis paths for three scenarios: <em>Achievable</em>, <em>Shortfall</em>, and <em>Deficit</em>, preventing optimistic hallucinations when money runs short.</p>
+            </div>
+            <div class="principle-item">
+              <h4>4. Transparent Category Classification</h4>
+              <p>Expenses are segregated into Essential (Needs) and Non-Essential (Wants), allowing targeted recommendations on discretionary spending while safeguarding necessities.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="btn-copy-inspector-prompt" class="btn btn-secondary">Copy System Prompt</button>
+        <button id="btn-dismiss-inspector" class="btn btn-primary">Close Inspector</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <div class="footer-container">
+      <p>SmartBudget AI – Built for Prompt Engineering Laboratory Experiments &bull; Lightweight & Database-Free &bull; Google Gemini API Ready</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
